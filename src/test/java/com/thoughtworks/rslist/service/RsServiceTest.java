@@ -131,4 +131,39 @@ class RsServiceTest {
     //then
     assertEquals(30,tradeDto.getAmount());
   }
+
+  @Test
+  void shouldBuyRsEventWhereTheRankIsEmpty(){
+    //given
+    UserDto userDto =
+            UserDto.builder()
+                    .voteNum(5)
+                    .phone("18888888888")
+                    .gender("female")
+                    .email("a@b.com")
+                    .age(19)
+                    .userName("xiaoli")
+                    .id(2)
+                    .build();
+    RsEventDto rsEventDto =
+            RsEventDto.builder()
+                    .eventName("event name")
+                    .id(1)
+                    .keyword("keyword")
+                    .voteNum(2)
+                    .user(userDto)
+                    .build();
+    when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto));
+    TradeDto tradeDto = TradeDto.builder()
+            .rank(2)
+            .build();
+    when(tradeRepository.findByRank(2)).thenReturn(tradeDto);
+    int tradeRank = 2;
+    //when
+    Trade trade = new Trade(1,tradeRank);
+    rsService.buy(trade,1);
+    TradeDto tradeDtoNew = tradeRepository.findByRank(tradeRank);
+    //then
+    assertEquals(1,tradeDto.getAmount());
+  }
 }

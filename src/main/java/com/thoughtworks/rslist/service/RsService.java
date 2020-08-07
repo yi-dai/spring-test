@@ -59,7 +59,6 @@ public class RsService {
     if (rsEventDtoOptional == null){
       throw new RuntimeException();
     }
-
     int amount = trade.getAmount();
     int rank = trade.getRank();
     TradeDto tradeDto = tradeRepository.findByRank(rank);
