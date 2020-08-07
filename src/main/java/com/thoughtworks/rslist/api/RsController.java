@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -107,5 +109,41 @@ public class RsController {
     Error error = new Error();
     error.setError(e.getMessage());
     return ResponseEntity.badRequest().body(error);
+  }
+
+  @GetMapping("/db/rs/list")
+  public ResponseEntity<List<RsEventDto>> getRsEventListBetweenInDB(
+          @RequestParam(required = false) Integer start, @RequestParam(required = false) Integer end) {
+    List<RsEventDto> rsEventDtos = rsEventRepository.findAll();
+    Collections.sort(rsEventDtos, (rsEventDto1, rsEventDto2) -> {
+      if(rsEventDto1.getAmount() > 0 || rsEventDto2.getAmount() > 0){
+        return 0;
+      }else{
+        if(rsEventDto1.getVoteNum() < rsEventDto2.getVoteNum()) return 1;
+        else if (rsEventDto1.getVoteNum() == rsEventDto2.getVoteNum()) return 0;
+        else return -1;
+      }
+    }
+    );
+
+    /*
+    Collections.sort(rsEventDtos, new Comparator<RsEventDto>() {
+              @Override
+              public int compare(RsEventDto rsEventDto1, RsEventDto rsEventDto2) {
+                if(rsEventDto1.getAmount() > 0 || rsEventDto2.getAmount() > 0){
+                  return 0;
+                }else{
+                  if(rsEventDto1.getVoteNum() < rsEventDto2.getVoteNum()) return 1;
+                  else if (rsEventDto1.getVoteNum() == rsEventDto2.getVoteNum()) return 0;
+                  else return -1;
+                }
+              }
+            }
+    );
+     */
+    if (start == null || end == null) {
+      return ResponseEntity.ok(rsEventDtos);
+    }
+    return ResponseEntity.ok(rsEventDtos.subList(start - 1, end));
   }
 }

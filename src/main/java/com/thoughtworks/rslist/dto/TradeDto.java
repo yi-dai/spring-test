@@ -21,4 +21,5 @@ public class TradeDto {
     @Id @GeneratedValue private int id;
     private int amount;
     private int rank;
+    private int rsEventId;
 }

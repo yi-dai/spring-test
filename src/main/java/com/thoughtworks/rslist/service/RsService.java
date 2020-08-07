@@ -10,6 +10,7 @@ import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -52,27 +53,41 @@ public class RsService {
     rsEventRepository.save(rsEvent);
   }
 
-  public void buy(Trade trade, int id) {
+  public ResponseEntity buy(Trade trade, int id) {
 
     Optional<RsEventDto> rsEventDtoOptional = rsEventRepository.findById(id);
     RsEventDto rsEventDto = rsEventDtoOptional.isPresent()?rsEventDtoOptional.get():null;
-    if (rsEventDtoOptional == null){
+    if (rsEventDto == null){
       throw new RuntimeException();
     }
     int amount = trade.getAmount();
     int rank = trade.getRank();
     TradeDto tradeDto = tradeRepository.findByRank(rank);
+    rsEventDto.setRank(rank);
+    rsEventDto.setAmount(amount);
     if(tradeDto == null){
       TradeDto newTradeDto = TradeDto.builder()
               .amount(amount)
+              .rsEventId(id)
               .rank(rank)
               .build();
       tradeRepository.save(newTradeDto);
+      rsEventRepository.save(rsEventDto);
+      return ResponseEntity.created(null).build();
     }else if (amount > tradeDto.getAmount()){
-      rsEventDto.setRank(rank);
+
+      Optional<RsEventDto> oldRsEventDtoOptional = rsEventRepository.findById(id);
+      RsEventDto oldRsEventDto = oldRsEventDtoOptional.isPresent()?rsEventDtoOptional.get():null;
+
+      rsEventRepository.delete(oldRsEventDto);
+      tradeDto.setRsEventId(id);
       tradeDto.setAmount(amount);
       tradeRepository.save(tradeDto);
+      rsEventRepository.save(rsEventDto);
+      return ResponseEntity.created(null).build();
+    }else{
+      return ResponseEntity.badRequest().build();
     }
-    rsEventRepository.save(rsEventDto);
+
   }
 }
