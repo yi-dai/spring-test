@@ -17,6 +17,7 @@ import org.mockito.Mock;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,15 +126,28 @@ class RsServiceTest {
             .rank(2)
             .build();
     List<TradeDto> tradeDtoList = new ArrayList<>();
-    tradeDtoList.add(tradeDto);
-    when(tradeRepository.findByRank(2)).thenReturn(tradeDtoList);
-    int tradeRank = 2;
     //when
     Trade trade = new Trade(30,2,1);
     rsService.buy(trade,1);
+    TradeDto tradeDto1 = TradeDto.builder()
+            .amount(30)
+            .rank(2)
+            .build();
+    tradeDtoList.add(tradeDto);
+    tradeDtoList.add(tradeDto1);
+    when(tradeRepository.findByRank(2)).thenReturn(tradeDtoList);
     List<TradeDto> tradeDtoList1 = tradeRepository.findByRank(2);
     //then
-    assertEquals(30,tradeDtoList1.get(0).getAmount());
+
+    TradeDto tradeDtoNew;
+    tradeDtoNew = tradeDtoList1.stream().max(new Comparator<TradeDto>() {
+      @Override
+      public int compare(TradeDto tradeDto1, TradeDto tradeDto2) {
+        if(tradeDto1.getAmount() > tradeDto2.getAmount()) return 1;
+        else return -1;
+      }
+    }).get();
+    assertEquals(30,tradeDtoNew.getAmount());
   }
 
   @Test
@@ -158,19 +172,28 @@ class RsServiceTest {
                     .user(userDto)
                     .build();
     when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto));
+
+    //when
+    Trade trade = new Trade(1,2,1);
+    rsService.buy(trade,1);
     TradeDto tradeDto = TradeDto.builder()
+            .amount(1)
             .rank(2)
             .build();
     List<TradeDto> tradeDtoList = new ArrayList<>();
     tradeDtoList.add(tradeDto);
     when(tradeRepository.findByRank(2)).thenReturn(tradeDtoList);
-    int tradeRank = 2;
-    //when
-    Trade trade = new Trade(1,tradeRank,1);
-    rsService.buy(trade,1);
     List<TradeDto> tradeDtoList1 = tradeRepository.findByRank(2);
     //then
-    assertEquals(1,tradeDtoList1.get(0).getAmount());
+    TradeDto tradeDtoNew;
+    tradeDtoNew = tradeDtoList1.stream().max(new Comparator<TradeDto>() {
+      @Override
+      public int compare(TradeDto tradeDto1, TradeDto tradeDto2) {
+        if(tradeDto1.getAmount() > tradeDto2.getAmount()) return 1;
+        else return -1;
+      }
+    }).get();
+    assertEquals(1,tradeDtoNew.getAmount());
   }
 
   @Test
