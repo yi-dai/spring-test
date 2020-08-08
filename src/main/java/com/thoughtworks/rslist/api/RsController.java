@@ -146,4 +146,12 @@ public class RsController {
     }
     return ResponseEntity.ok(rsEventDtos.subList(start - 1, end));
   }
+
+  @PostMapping("/db/rs/event/buy")
+  public ResponseEntity finishTrade(@RequestBody Trade trade){
+    int rsEventId = trade.getRsEventId();
+    String result = rsService.buy(trade,rsEventId);
+    if(result == "Amount not larger than the old one.") return ResponseEntity.badRequest().build();
+    return ResponseEntity.created(null).build();
+  }
 }

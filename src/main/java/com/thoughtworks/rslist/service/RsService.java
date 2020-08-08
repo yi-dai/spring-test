@@ -53,8 +53,10 @@ public class RsService {
     rsEventRepository.save(rsEvent);
   }
 
-  public ResponseEntity buy(Trade trade, int id) {
+  public String buy(Trade trade, int id) {
 
+    String boughtSuccessful = "Already buy the rank for given RsEvent.";
+    String boughtFailed = "Amount not larger than the old one.";
     Optional<RsEventDto> rsEventDtoOptional = rsEventRepository.findById(id);
     RsEventDto rsEventDto = rsEventDtoOptional.isPresent()?rsEventDtoOptional.get():null;
     if (rsEventDto == null){
@@ -73,7 +75,7 @@ public class RsService {
               .build();
       tradeRepository.save(newTradeDto);
       rsEventRepository.save(rsEventDto);
-      return ResponseEntity.created(null).build();
+      return boughtSuccessful;
     }else if (amount > tradeDto.getAmount()){
 
       Optional<RsEventDto> oldRsEventDtoOptional = rsEventRepository.findById(id);
@@ -84,9 +86,9 @@ public class RsService {
       tradeDto.setAmount(amount);
       tradeRepository.save(tradeDto);
       rsEventRepository.save(rsEventDto);
-      return ResponseEntity.created(null).build();
+      return boughtSuccessful;
     }else{
-      return ResponseEntity.badRequest().build();
+      return boughtFailed;
     }
 
   }

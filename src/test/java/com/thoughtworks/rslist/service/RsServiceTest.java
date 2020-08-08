@@ -126,7 +126,7 @@ class RsServiceTest {
     when(tradeRepository.findByRank(2)).thenReturn(tradeDto);
     int tradeRank = 2;
     //when
-    Trade trade = new Trade(30,2);
+    Trade trade = new Trade(30,2,1);
     rsService.buy(trade,1);
     tradeDto = tradeRepository.findByRank(2);
     //then
@@ -161,7 +161,7 @@ class RsServiceTest {
     when(tradeRepository.findByRank(2)).thenReturn(tradeDto);
     int tradeRank = 2;
     //when
-    Trade trade = new Trade(1,tradeRank);
+    Trade trade = new Trade(1,tradeRank,1);
     rsService.buy(trade,1);
     TradeDto tradeDtoNew = tradeRepository.findByRank(tradeRank);
     //then
@@ -197,7 +197,7 @@ class RsServiceTest {
     when(tradeRepository.findByRank(2)).thenReturn(tradeDto);
     int tradeRank = 2;
     //when
-    Trade trade = new Trade(1,tradeRank);
+    Trade trade = new Trade(1,tradeRank,1);
     rsService.buy(trade,1);
     TradeDto tradeDtoNew = tradeRepository.findByRank(tradeRank);
     //then
