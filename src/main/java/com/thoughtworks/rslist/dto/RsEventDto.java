@@ -26,4 +26,5 @@ public class RsEventDto {
   private Integer rank;
   private int amount;
 
+
 }

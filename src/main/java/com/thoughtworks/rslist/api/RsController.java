@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -112,7 +111,7 @@ public class RsController {
   }
 
   @GetMapping("/db/rs/list")
-  public ResponseEntity<List<RsEventDto>> getRsEventListBetweenInDB(
+  public ResponseEntity<List<RsEvent>> getRsEventListBetweenInDB(
           @RequestParam(required = false) Integer start, @RequestParam(required = false) Integer end) {
     List<RsEventDto> rsEventDtos = rsEventRepository.findAll();
     Collections.sort(rsEventDtos, (rsEventDto1, rsEventDto2) -> {
@@ -125,26 +124,14 @@ public class RsController {
       }
     }
     );
-
-    /*
-    Collections.sort(rsEventDtos, new Comparator<RsEventDto>() {
-              @Override
-              public int compare(RsEventDto rsEventDto1, RsEventDto rsEventDto2) {
-                if(rsEventDto1.getAmount() > 0 || rsEventDto2.getAmount() > 0){
-                  return 0;
-                }else{
-                  if(rsEventDto1.getVoteNum() < rsEventDto2.getVoteNum()) return 1;
-                  else if (rsEventDto1.getVoteNum() == rsEventDto2.getVoteNum()) return 0;
-                  else return -1;
-                }
-              }
-            }
-    );
-     */
+    List<RsEvent> rsEventList = rsEventDtos.stream()
+            .map(dto ->
+                    new RsEvent(dto.getEventName(),dto.getKeyword(),dto.getVoteNum(),dto.getUser().getId()))
+            .collect(Collectors.toList());
     if (start == null || end == null) {
-      return ResponseEntity.ok(rsEventDtos);
+      return ResponseEntity.ok(rsEventList);
     }
-    return ResponseEntity.ok(rsEventDtos.subList(start - 1, end));
+    return ResponseEntity.ok(rsEventList.subList(start - 1, end));
   }
 
   @PostMapping("/db/rs/event/buy")

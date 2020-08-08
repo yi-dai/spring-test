@@ -10,10 +10,8 @@ import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,38 +65,35 @@ public class RsService {
     int amount = trade.getAmount();
     int rank = trade.getRank();
     List<TradeDto> tradeDtoList = tradeRepository.findByRank(rank);
-    TradeDto tradeDto = tradeDtoList.stream().max(new Comparator<TradeDto>() {
-      @Override
-      public int compare(TradeDto tradeDto1, TradeDto tradeDto2) {
+    TradeDto tradeDto;
+    if(tradeDtoList.size() > 0){
+      tradeDto = tradeDtoList.stream().max((tradeDto1, tradeDto2) -> {
         if(tradeDto1.getAmount() > tradeDto2.getAmount()) return 1;
         else return -1;
-      }
-    }).get();
+      }).get();
+    } else {
+      tradeDto = null;
+    }
     rsEventDto.setRank(rank);
     rsEventDto.setAmount(amount);
+    TradeDto newTradeDto = TradeDto.builder()
+            .amount(amount)
+            .rsEventId(id)
+            .rank(rank)
+            .build();
     if(tradeDto == null){
-      TradeDto newTradeDto = TradeDto.builder()
-              .amount(amount)
-              .rsEventId(id)
-              .rank(rank)
-              .build();
       tradeRepository.save(newTradeDto);
       rsEventRepository.save(rsEventDto);
       return boughtSuccessful;
     }else if (amount > tradeDto.getAmount()){
-
       Optional<RsEventDto> oldRsEventDtoOptional = rsEventRepository.findById(id);
       RsEventDto oldRsEventDto = oldRsEventDtoOptional.isPresent()?rsEventDtoOptional.get():null;
-
       rsEventRepository.delete(oldRsEventDto);
-      tradeDto.setRsEventId(id);
-      tradeDto.setAmount(amount);
-      tradeRepository.save(tradeDto);
       rsEventRepository.save(rsEventDto);
+      tradeRepository.save(newTradeDto);
       return boughtSuccessful;
     }else{
       return boughtFailed;
     }
-
   }
 }
