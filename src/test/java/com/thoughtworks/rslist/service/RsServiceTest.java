@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,14 +124,16 @@ class RsServiceTest {
             .amount(20)
             .rank(2)
             .build();
-    when(tradeRepository.findByRank(2)).thenReturn(tradeDto);
+    List<TradeDto> tradeDtoList = new ArrayList<>();
+    tradeDtoList.add(tradeDto);
+    when(tradeRepository.findByRank(2)).thenReturn(tradeDtoList);
     int tradeRank = 2;
     //when
     Trade trade = new Trade(30,2,1);
     rsService.buy(trade,1);
-    tradeDto = tradeRepository.findByRank(2);
+    List<TradeDto> tradeDtoList1 = tradeRepository.findByRank(2);
     //then
-    assertEquals(30,tradeDto.getAmount());
+    assertEquals(30,tradeDtoList1.get(0).getAmount());
   }
 
   @Test
@@ -158,14 +161,16 @@ class RsServiceTest {
     TradeDto tradeDto = TradeDto.builder()
             .rank(2)
             .build();
-    when(tradeRepository.findByRank(2)).thenReturn(tradeDto);
+    List<TradeDto> tradeDtoList = new ArrayList<>();
+    tradeDtoList.add(tradeDto);
+    when(tradeRepository.findByRank(2)).thenReturn(tradeDtoList);
     int tradeRank = 2;
     //when
     Trade trade = new Trade(1,tradeRank,1);
     rsService.buy(trade,1);
-    TradeDto tradeDtoNew = tradeRepository.findByRank(tradeRank);
+    List<TradeDto> tradeDtoList1 = tradeRepository.findByRank(2);
     //then
-    assertEquals(1,tradeDto.getAmount());
+    assertEquals(1,tradeDtoList1.get(0).getAmount());
   }
 
   @Test
@@ -194,14 +199,19 @@ class RsServiceTest {
             .amount(40)
             .rank(2)
             .build();
-    when(tradeRepository.findByRank(2)).thenReturn(tradeDto);
+
+
+
+
+    List<TradeDto> tradeDtoList = new ArrayList<>();
+    tradeDtoList.add(tradeDto);
+    when(tradeRepository.findByRank(2)).thenReturn(tradeDtoList);
     int tradeRank = 2;
     //when
     Trade trade = new Trade(1,tradeRank,1);
     rsService.buy(trade,1);
-    TradeDto tradeDtoNew = tradeRepository.findByRank(tradeRank);
+    List<TradeDto> tradeDtoList1 = tradeRepository.findByRank(2);
     //then
-
   }
 
 

@@ -13,6 +13,8 @@ import com.thoughtworks.rslist.repository.VoteRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -64,7 +66,14 @@ public class RsService {
     }
     int amount = trade.getAmount();
     int rank = trade.getRank();
-    TradeDto tradeDto = tradeRepository.findByRank(rank);
+    List<TradeDto> tradeDtoList = tradeRepository.findByRank(rank);
+    TradeDto tradeDto = tradeDtoList.stream().max(new Comparator<TradeDto>() {
+      @Override
+      public int compare(TradeDto tradeDto1, TradeDto tradeDto2) {
+        if(tradeDto1.getAmount() > tradeDto2.getAmount()) return 1;
+        else return -1;
+      }
+    }).get();
     rsEventDto.setRank(rank);
     rsEventDto.setAmount(amount);
     if(tradeDto == null){

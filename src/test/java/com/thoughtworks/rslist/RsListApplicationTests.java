@@ -76,6 +76,52 @@ class RsListApplicationTests {
     }
 
     @Test
+    void buyAlreadyBeBoughtRank() throws Exception {
+        UserDto userDto =
+                UserDto.builder()
+                        .voteNum(5)
+                        .phone("18888888888")
+                        .gender("female")
+                        .email("a@b.com")
+                        .age(19)
+                        .userName("xiaoli")
+                        .build();
+        userRepository.save(userDto);
+        RsEventDto rsEventDto =
+                RsEventDto.builder()
+                        .eventName("event name")
+                        .keyword("keyword")
+                        .voteNum(2)
+                        .user(userDto)
+                        .build();
+        rsEventDto = rsEventRepository.save(rsEventDto);
+        int rsEventDtoId = rsEventDto.getId();
+        RsEventDto rsEventDtoOld =
+                RsEventDto.builder()
+                        .eventName("name")
+                        .keyword("key")
+                        .voteNum(3)
+                        .user(userDto)
+                        .build();
+        rsEventRepository.save(rsEventDtoOld);
+        int rsEventDtoOldId = rsEventDto.getId();
+        TradeDto tradeDto = TradeDto.builder()
+                .rank(1)
+                .amount(5)
+                .rsEventId(rsEventDtoOldId)
+                .build();
+        tradeRepository.save(tradeDto);
+        Trade trade = new Trade(10,1,rsEventDtoId);
+        String tradeDtoString = objectMapper.writeValueAsString(trade);
+        mockMvc.perform(post("/db/rs/event/buy").content(tradeDtoString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        List<TradeDto> tradeDtoList = tradeRepository.findAll();
+        assertEquals(10,tradeDtoList.get(0).getAmount());
+        assertEquals(1,tradeDtoList.get(0).getRank());
+        assertEquals(rsEventDtoId,tradeDtoList.get(0).getRsEventId());
+    }
+
+    @Test
     void contextLoads() {
     }
 
