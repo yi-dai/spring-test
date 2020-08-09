@@ -115,8 +115,6 @@ public class RsController {
           @RequestParam(required = false) Integer start, @RequestParam(required = false) Integer end) {
     List<RsEventDto> rsEventDtos = rsEventRepository.findAll();
     Collections.sort(rsEventDtos, (rsEventDto1, rsEventDto2) -> {
-      int r1 = rsEventDto1.getAmount();
-      int r2 = rsEventDto2.getAmount();
       if(rsEventDto1.getAmount() > 0){
         return -1;
       } else if (rsEventDto2.getAmount() > 0) return 0;
@@ -127,8 +125,6 @@ public class RsController {
         }
       }
     );
-    int r12 = rsEventDtos.get(0).getAmount();
-    int r22 = rsEventDtos.get(1).getAmount();
     List<RsEvent> rsEventList = rsEventDtos.stream()
             .map(dto ->
                     new RsEvent(dto.getEventName(),dto.getKeyword(),dto.getVoteNum(),dto.getUser().getId()))
