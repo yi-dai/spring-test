@@ -68,8 +68,8 @@ public class RsService {
     TradeDto tradeDto;
     if(tradeDtoList.size() > 0){
       tradeDto = tradeDtoList.stream().max((tradeDto1, tradeDto2) -> {
-        if(tradeDto1.getAmount() > tradeDto2.getAmount()) return -1;
-        else return 1;
+        if(tradeDto1.getAmount() > tradeDto2.getAmount()) return 1;
+        else return -1;
       }).get();
     } else {
       tradeDto = null;
