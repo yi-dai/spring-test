@@ -278,6 +278,12 @@ class RsListApplicationTests {
         rsEventRepository.save(rsEventDto2);
         rsEventRepository.save(rsEventDto3);
         rsEventRepository.save(rsEventDto4);
+        mockMvc.perform(get("/db/rs/list"))
+                .andExpect(jsonPath("$[0].eventName", is("event3")))
+                .andExpect(jsonPath("$[1].eventName", is("event2")))
+                .andExpect(jsonPath("$[2].eventName", is("event1")))
+                .andExpect(jsonPath("$[3].eventName", is("event4")))
+                .andExpect(status().isOk());
         int rsEventDto1Id = rsEventDto1.getId();
 
 
@@ -297,6 +303,73 @@ class RsListApplicationTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void getRsEventListInCorrectOrder2() throws Exception {
+        UserDto userDto =
+                UserDto.builder()
+                        .voteNum(5)
+                        .phone("18888888888")
+                        .gender("female")
+                        .email("a@b.com")
+                        .age(19)
+                        .userName("xiaoli")
+                        .build();
+        userRepository.save(userDto);
+        RsEventDto rsEventDto1 =
+                RsEventDto.builder()
+                        .eventName("event1")
+                        .keyword("keyword1")
+                        .voteNum(0)
+                        .user(userDto)
+                        .build();
+        RsEventDto rsEventDto2 =
+                RsEventDto.builder()
+                        .eventName("event2")
+                        .keyword("keyword2")
+                        .voteNum(2)
+                        .user(userDto)
+                        .build();
+        RsEventDto rsEventDto3 =
+                RsEventDto.builder()
+                        .eventName("event3")
+                        .keyword("keyword3")
+                        .voteNum(3)
+                        .user(userDto)
+                        .build();
+        RsEventDto rsEventDto4 =
+                RsEventDto.builder()
+                        .eventName("event4")
+                        .keyword("keyword4")
+                        .voteNum(0)
+                        .user(userDto)
+                        .build();
+        rsEventRepository.save(rsEventDto1);
+        rsEventRepository.save(rsEventDto2);
+        rsEventRepository.save(rsEventDto3);
+        rsEventRepository.save(rsEventDto4);
+        int rsEventDto1Id = rsEventDto1.getId();
+
+
+        Trade trade = new Trade(10,1,rsEventDto1Id);
+        String tradeDtoString = objectMapper.writeValueAsString(trade);
+        mockMvc.perform(post("/db/rs/event/buy").content(tradeDtoString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        int rsEventDto2Id = rsEventDto2.getId();
+        Trade trade2 = new Trade(20,1,rsEventDto2Id);
+        String tradeDtoString2 = objectMapper.writeValueAsString(trade2);
+        mockMvc.perform(post("/db/rs/event/buy").content(tradeDtoString2).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        int rsEventDto4Id = rsEventDto4.getId();
+        Trade trade4 = new Trade(30,1,rsEventDto4Id);
+        String tradeDtoString4 = objectMapper.writeValueAsString(trade4);
+        mockMvc.perform(post("/db/rs/event/buy").content(tradeDtoString4).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        mockMvc.perform(get("/db/rs/list"))
+                .andExpect(jsonPath("$[0].eventName", is("event4")))
+                .andExpect(jsonPath("$[1].eventName", is("event3")))
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(status().isOk());
+    }
 
 
     @Test
