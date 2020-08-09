@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -229,6 +230,62 @@ class RsListApplicationTests {
         mockMvc.perform(get("/db/rs/list"))
                 .andExpect(jsonPath("$[0].eventName", is("event1")))
                 .andExpect(jsonPath("$[1].eventName", is("event3")))
+                .andExpect(status().isOk());
+    }
+
+
+    @Test
+    void getRsEventListInCorrectOrder1() throws Exception {
+        UserDto userDto =
+                UserDto.builder()
+                        .voteNum(5)
+                        .phone("18888888888")
+                        .gender("female")
+                        .email("a@b.com")
+                        .age(19)
+                        .userName("xiaoli")
+                        .build();
+        userRepository.save(userDto);
+        RsEventDto rsEventDto1 =
+                RsEventDto.builder()
+                        .eventName("event1")
+                        .keyword("keyword1")
+                        .voteNum(0)
+                        .user(userDto)
+                        .build();
+        RsEventDto rsEventDto2 =
+                RsEventDto.builder()
+                        .eventName("event2")
+                        .keyword("keyword2")
+                        .voteNum(2)
+                        .user(userDto)
+                        .build();
+        RsEventDto rsEventDto3 =
+                RsEventDto.builder()
+                        .eventName("event3")
+                        .keyword("keyword3")
+                        .voteNum(3)
+                        .user(userDto)
+                        .build();
+        rsEventRepository.save(rsEventDto1);
+        rsEventRepository.save(rsEventDto2);
+        rsEventRepository.save(rsEventDto3);
+        int rsEventDto1Id = rsEventDto1.getId();
+
+
+        Trade trade = new Trade(10,1,rsEventDto1Id);
+        String tradeDtoString = objectMapper.writeValueAsString(trade);
+        mockMvc.perform(post("/db/rs/event/buy").content(tradeDtoString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        int rsEventDto2Id = rsEventDto2.getId();
+        Trade trade2 = new Trade(20,1,rsEventDto2Id);
+        String tradeDtoString2 = objectMapper.writeValueAsString(trade2);
+        mockMvc.perform(post("/db/rs/event/buy").content(tradeDtoString2).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+        mockMvc.perform(get("/db/rs/list"))
+                .andExpect(jsonPath("$[0].eventName", is("event2")))
+                .andExpect(jsonPath("$[1].eventName", is("event3")))
+                .andExpect(jsonPath("$",hasSize(2)))
                 .andExpect(status().isOk());
     }
 

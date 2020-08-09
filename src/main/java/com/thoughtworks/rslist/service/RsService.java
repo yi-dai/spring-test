@@ -68,8 +68,8 @@ public class RsService {
     TradeDto tradeDto;
     if(tradeDtoList.size() > 0){
       tradeDto = tradeDtoList.stream().max((tradeDto1, tradeDto2) -> {
-        if(tradeDto1.getAmount() > tradeDto2.getAmount()) return 1;
-        else return -1;
+        if(tradeDto1.getAmount() > tradeDto2.getAmount()) return -1;
+        else return 1;
       }).get();
     } else {
       tradeDto = null;
@@ -86,9 +86,8 @@ public class RsService {
       rsEventRepository.save(rsEventDto);
       return boughtSuccessful;
     }else if (amount > tradeDto.getAmount()){
-      Optional<RsEventDto> oldRsEventDtoOptional = rsEventRepository.findById(id);
-      RsEventDto oldRsEventDto = oldRsEventDtoOptional.isPresent()?rsEventDtoOptional.get():null;
-      rsEventRepository.delete(oldRsEventDto);
+      int oldRsEventId = tradeDto.getRsEventId();
+      rsEventRepository.deleteById(oldRsEventId);
       rsEventRepository.save(rsEventDto);
       tradeRepository.save(newTradeDto);
       return boughtSuccessful;
